@@ -117,7 +117,7 @@ Persistence must be explicit: a single-device prototype may use browser storage;
 
 OpenAI Developers is available. The embedded project picker failed to display, while backend target discovery succeeded. The user approved secure fallback creation and the exact local .env.local destination. The first created key could not be saved because its temporary encryption file was unavailable. The user explicitly approved a replacement; it was securely saved, and its temporary encryption files were removed. A real verification request reached OpenAI and returned credit_balance_exhausted / insufficient_quota. The optional API credit offer was checked and returned not_qualified. No successful inference is claimed. API credits must be added by the user.
 
-The user subsequently chose Gemini's free-tier route. Gemini is now selected explicitly by default, with no automatic OpenAI fallback. The local Connect Gemini form saves the user's Google key to the ignored server configuration and tests Google's endpoint. Google sign-in/key creation and confirmation of a Free tier project remain user actions. No real Gemini request or full autonomous workflow is yet verified. See docs/GEMINI_SETUP.md.
+The user subsequently chose Gemini's free-tier route and supplied a key through the local form after confirming a Free tier project. The key is stored in ignored server configuration. Google's model-list endpoint accepted it, while generation returned 503/high demand or timed out. The full autonomous workflow is not yet verified. There is no automatic OpenAI fallback. See docs/GEMINI_SETUP.md and docs/CONNECTION_DIAGNOSTICS.md.
 
 ## Scope boundaries
 
