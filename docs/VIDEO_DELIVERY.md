@@ -1,5 +1,7 @@
 # TeamPilot narrated demo
 
+The revised male Malay version is documented in [VIDEO_MALAY_DELIVERY.md](VIDEO_MALAY_DELIVERY.md) and stored in `artifacts/video-malay/TeamPilot-demo-malay-male.mp4`.
+
 The video follows a fictional campus recycling project through a real Gemini delay-recovery run. It shows the existing brief and capacity, Ali's three-day absence, actual application tool results, a staged proposal, human approval, the updated board, and export options.
 
 The final export is **2 minutes 45.38 seconds**, 1920×1080 at 24 fps, H.264 video with AAC audio, and 6,245,582 bytes. Complete-file decoding passed. Opening, middle, proposal, and ending frames were visually inspected for caption legibility, faithful screenshots, and disclosure labels. The six narration files contain no clipped samples; an independent automatic transcription confirmed the script apart from two spelling variants. Voice pleasantness and exact caption synchronization still benefit from presenter review.

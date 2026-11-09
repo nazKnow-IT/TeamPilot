@@ -178,7 +178,7 @@ def load_manifest(path: Path, work: Path, ffmpeg: str, fps: int) -> tuple[dict, 
             previous_at = at
         if parsed_frames[0]["at"] != 0:
             raise RenderError(f"The first screenshot in {sid} must start at 0 seconds.")
-        scenes.append({**raw, "id": sid, "title": str(raw.get("title", sid)), "narration": narration,
+        scenes.append({**raw, "labels": manifest.get("labels", {}), "id": sid, "title": str(raw.get("title", sid)), "narration": narration,
                        "normalized_audio": normalized, "audio_duration": audio_duration, "duration": duration,
                        "start": absolute_start, "frames": parsed_frames, "captions": caption_spans(narration, audio_duration),
                        "disclosure": bool(raw.get("disclosure", index in (0, len(manifest["scenes"]) - 1)))})
@@ -209,6 +209,9 @@ def base_frame(scene: dict, screenshot_path: Path, number: int, count: int) -> I
     draw.text((365, 35), f"{number:02d} / {count:02d}", font=FONTS["small"], fill="#AFC2B3")
     title_lines = fit_lines(scene["title"], FONTS["title"], 1020, 1)
     draw.text((488, 38), title_lines[0] if title_lines else "", font=FONTS["title"], fill="white")
+    if scene.get("subtitle"):
+        subtitle = fit_lines(scene["subtitle"], FONTS["eyebrow"], 1370, 1)[0]
+        draw.text((488, 83), subtitle, font=FONTS["eyebrow"], fill="#C6D6C8")
     draw.rounded_rectangle((1743, 35, 1864, 79), radius=10, fill=LIME)
     draw.text((1769, 42), "DEMO", font=FONTS["demo"], fill=TEAL)
 
@@ -228,11 +231,12 @@ def base_frame(scene: dict, screenshot_path: Path, number: int, count: int) -> I
         w = draw.textlength(label, font=FONTS["small"]) + 34
         draw.rounded_rectangle((77, 159, 77 + w, 202), radius=7, fill=TEAL)
         draw.text((94, 167), label, font=FONTS["small"], fill=LIME)
+    labels = scene.get("labels", {})
     if scene["disclosure"]:
-        draw.text((58, 1038), "AI-generated narration · Authentic application captures", font=FONTS["eyebrow"], fill=MUTED)
+        draw.text((58, 1038), labels.get("disclosure", "AI-generated narration · Authentic application captures"), font=FONTS["eyebrow"], fill=MUTED)
     else:
-        draw.text((58, 1038), "Student team coordination · Human review before changes", font=FONTS["eyebrow"], fill=MUTED)
-    draw.text((1620, 1038), "AGENTIC AI DEMO", font=FONTS["eyebrow"], fill=MUTED)
+        draw.text((58, 1038), labels.get("footer", "Student team coordination · Human review before changes"), font=FONTS["eyebrow"], fill=MUTED)
+    draw.text((1620, 1038), labels.get("demo_footer", "AGENTIC AI DEMO"), font=FONTS["eyebrow"], fill=MUTED)
     return canvas
 
 

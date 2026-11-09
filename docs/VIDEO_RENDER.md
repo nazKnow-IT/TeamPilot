@@ -43,7 +43,7 @@ Each scene requires a WAV file and at least one screenshot. The first screenshot
 
 The WAV duration plus 0.35 seconds of leading silence and 0.45 seconds of trailing silence determines the scene duration, rounded to a full frame. An optional scene `duration` may make it longer but never truncates speech. Any additional duration is silent tail time. Total length may not exceed `max_duration` (default 300 seconds).
 
-English phrase captions are burned in and also exported to `.srt`. Their timestamps are approximate, distributed across the supplied narration duration; they are not forced-aligned word timestamps. A persistent DEMO label is added. First and last scenes disclose AI-generated narration by default. Set `disclosure: true` on other scenes to show that label as well.
+Phrase captions in the supplied narration language are burned in and also exported to `.srt`. Their timestamps are approximate, distributed across the supplied narration duration; they are not forced-aligned word timestamps. A persistent DEMO label is added. First and last scenes disclose AI-generated narration by default. Set `disclosure: true` on other scenes to show that label as well. A manifest-level `labels` object may localize `disclosure`, `footer`, and `demo_footer`; English is the default. An optional scene `subtitle` displays a compact technology line beneath the chapter heading.
 
 `cut_label` must accurately describe an edited wait or changed playback rate. Do not label a static screenshot sequence as an unedited screen recording. The renderer faithfully uses only supplied frames; it does not fabricate agent activity or UI states.
 

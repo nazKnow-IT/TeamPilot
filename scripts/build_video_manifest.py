@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import wave
 from pathlib import Path
 
 
@@ -29,6 +30,7 @@ CAPTURE_SEQUENCE = {
         ("export-options.jpg", 23)],
     6: [("scene-6.jpg", 0)],
 }
+REFERENCE_AUDIO_SECONDS = {1: 22.92, 2: 24.04, 3: 21.96, 4: 35.56, 5: 27.28, 6: 28.68}
 
 
 def extract_scenes(markdown: str) -> list[dict[str, str]]:
@@ -50,25 +52,41 @@ def extract_scenes(markdown: str) -> list[dict[str, str]]:
     return scenes
 
 
-def build_manifest(narration: list[dict[str, str]]) -> dict:
+def build_manifest(narration: list[dict[str, str]], language: str = "en-US",
+                   frames_dir: str = "frames", output: Path | None = None) -> dict:
     scenes = []
     for number, item in enumerate(narration, start=1):
+        scale = 1.0
+        audio = output / "audio" / f"{item['id']}.wav" if output else None
+        if language != "en-US" and audio and audio.is_file():
+            with wave.open(str(audio), "rb") as reader:
+                scale = reader.getnframes() / reader.getframerate() / REFERENCE_AUDIO_SECONDS[number]
         scene = {
             "id": item["id"],
             "title": item["title"],
             "narration": item["text"],
             "audio": f"audio/{item['id']}.wav",
-            "frames": [{"path": f"frames/{name}", "at": at}
+            "frames": [{"path": f"{frames_dir.rstrip('/')}/{name}", "at": round(at * scale, 3)}
                        for name, at in CAPTURE_SEQUENCE[number]],
             "disclosure": number in (1, 6),
         }
         if number == 4:
-            scene["cut_label"] = "Recorded live run · waiting time shortened"
+            scene["cut_label"] = ("Demo sebenar dirakam · masa menunggu dipendekkan"
+                                  if language == "ms-MY" else "Recorded live run · waiting time shortened")
         if number == 6:
             scene["subtitle"] = TECHNOLOGY_SUBTITLE
         scenes.append(scene)
     # No fixed durations: the renderer must use the actual WAV lengths.
-    return {"title": "TeamPilot — Group Project Coordination Agent", "scenes": scenes}
+    manifest = {"title": "TeamPilot — Group Project Coordination Agent", "scenes": scenes,
+                "language": language}
+    if language == "ms-MY":
+        manifest["title"] = "TeamPilot — Ejen AI Penyelarasan Projek Berkumpulan"
+        manifest["labels"] = {
+            "disclosure": "Narasi dijana AI · Paparan aplikasi sebenar",
+            "footer": "Projek berkumpulan · Semakan manusia sebelum perubahan",
+            "demo_footer": "DEMO EJEN AI",
+        }
+    return manifest
 
 
 def main() -> None:
@@ -76,12 +94,15 @@ def main() -> None:
     default_root = Path(__file__).resolve().parents[1]
     parser.add_argument("--project-root", type=Path, default=default_root)
     parser.add_argument("--output-dir", type=Path)
+    parser.add_argument("--source", type=Path, help="Narration Markdown; defaults to the English final script")
+    parser.add_argument("--language", default="en-US", choices=("en-US", "ms-MY"))
+    parser.add_argument("--frames-dir", default="frames", help="Frame path relative to the generated manifest")
     args = parser.parse_args()
     root = args.project_root.resolve()
     output = args.output_dir.resolve() if args.output_dir else root / "artifacts" / "video"
-    source = root / "docs" / "VIDEO_SCRIPT_FINAL.md"
+    source = args.source.resolve() if args.source else root / "docs" / "VIDEO_SCRIPT_FINAL.md"
     narration = extract_scenes(source.read_text(encoding="utf-8-sig"))
-    manifest = build_manifest(narration)
+    manifest = build_manifest(narration, args.language, args.frames_dir, output)
     output.mkdir(parents=True, exist_ok=True)
     for filename, payload in (("narration.json", narration), ("manifest.json", manifest)):
         (output / filename).write_text(

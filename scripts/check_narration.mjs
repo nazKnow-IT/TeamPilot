@@ -2,10 +2,12 @@
 // Secrets are read only from the environment and are never written to reports.
 import {readFile, writeFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
-import {join} from 'node:path';
+import {join,resolve} from 'node:path';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
-const dir=join(root,'artifacts','video');
+const option=(name,fallback)=>{const i=process.argv.indexOf(name);if(i<0)return fallback;if(!process.argv[i+1]||process.argv[i+1].startsWith('--'))throw new Error(`Missing value for ${name}`);return process.argv[i+1];};
+const dir=resolve(root,option('--production-dir','artifacts/video'));
+const language=option('--language','en-US');
 const scenes=JSON.parse(await readFile(join(dir,'narration.json'),'utf8'));
 function readWave(bytes){
   if(bytes.toString('ascii',0,4)!=='RIFF'||bytes.toString('ascii',8,12)!=='WAVE')throw Error('Invalid WAV header');
@@ -24,7 +26,7 @@ function readWave(bytes){
   return {fmt,data,stats:{seconds:samples/fmt.rate,peak,clipped_samples:clipped,rms:Math.sqrt(squares/samples),active_fraction:active/samples}};
 }
 const waves=[];
-const report={technical_checks:[],transcription:{performed:false},human_listening_performed:false};
+const report={language,technical_checks:[],transcription:{performed:false},human_listening_performed:false};
 for(const scene of scenes){
   const wave=readWave(await readFile(join(dir,'audio',scene.id+'.wav')));waves.push(wave);
   const passed=wave.stats.seconds>3&&wave.stats.clipped_samples===0&&wave.stats.rms>100&&wave.stats.active_fraction>.1;
@@ -40,14 +42,21 @@ if(process.argv.includes('--transcribe')){
   try{
     const response=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent',{
       method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':key},
-      body:JSON.stringify({contents:[{role:'user',parts:[{text:'Transcribe the spoken English in this audio verbatim. Return only the words spoken, with punctuation. Do not summarize, correct, explain, or add headings.'},{inlineData:{mimeType:'audio/wav',data:merged.toString('base64')}}]}],generationConfig:{maxOutputTokens:2048,temperature:0}}),signal:AbortSignal.timeout(90000)
+      body:JSON.stringify({contents:[{role:'user',parts:[{text:language==='ms-MY'
+        ? 'Transkripsikan semua pertuturan Bahasa Melayu dalam audio ini secara verbatim, termasuk istilah bahasa Inggeris yang disebut. Pulangkan perkataan yang dituturkan sahaja, dengan tanda baca. Jangan terjemahkan, ringkaskan, betulkan tatabahasa, terangkan atau tambah tajuk.'
+        : 'Transcribe the spoken English in this audio verbatim. Return only the words spoken, with punctuation. Do not summarize, correct, explain, or add headings.'},{inlineData:{mimeType:'audio/wav',data:merged.toString('base64')}}]}],generationConfig:{maxOutputTokens:2048,temperature:0}}),signal:AbortSignal.timeout(90000)
     });
     const result=await response.json();
     if(!response.ok)throw Error(`Transcription HTTP ${response.status}: ${String(result.error?.message||'request failed').split(key).join('[redacted]')}`);
     const transcript=(result.candidates?.[0]?.content?.parts||[]).filter(p=>typeof p.text==='string'&&!p.thought).map(p=>p.text).join('\n').trim();
     if(!transcript)throw Error('No transcription returned');
     await writeFile(join(dir,'audio-transcript.txt'),transcript+'\n');
-    const normalize=s=>s.toLowerCase().replace(/[’]/g,"'").replace(/\bteam\s*pilot\b/g,'team pilot').replace(/\b14\b/g,'fourteen').replace(/[^a-z0-9']/g,' ').trim().split(/\s+/);
+    const normalize=s=>{
+      let text=s.toLowerCase().replace(/[’]/g,"'").replace(/\bteam\s*pilot\b/g,'team pilot');
+      if(language==='ms-MY')text=text.replace(/\b14\b/g,'empat belas').replace(/\b9\b/g,'sembilan').replace(/\b11\b/g,'sebelas');
+      else text=text.replace(/\b14\b/g,'fourteen');
+      return text.replace(/[^a-z0-9']/g,' ').trim().split(/\s+/);
+    };
     const expected=normalize(scenes.map(s=>s.text).join(' ')),actual=normalize(transcript);
     let prev=Array.from({length:actual.length+1},(_,i)=>i);
     for(let i=1;i<=expected.length;i++){const next=[i];for(let j=1;j<=actual.length;j++)next[j]=Math.min(next[j-1]+1,prev[j]+1,prev[j-1]+(expected[i-1]===actual[j-1]?0:1));prev=next;}
