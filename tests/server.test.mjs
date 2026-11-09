@@ -16,3 +16,4 @@ test('local server health, static allowlist and cross-origin protection',async t
   assert.equal(evilStatus,403);
 });
 test('API errors redact key-shaped text and classify quota/access issues',()=>{assert.doesNotMatch(safeError(new Error('bad sk-proj-123456789abcdef')),/sk-proj/);assert.match(safeError({status:429}),/quota/);assert.match(safeError({status:401}),/credential/);});
+test('exhausted credits are distinguished from a transient rate limit',()=>{const message=safeError({status:429,code:'credit_balance_exhausted',type:'insufficient_quota'});assert.match(message,/No API credits/);assert.match(message,/does not need to be replaced/);assert.doesNotMatch(message,/rate limit/);});

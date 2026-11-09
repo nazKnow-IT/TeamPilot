@@ -6,7 +6,7 @@ A local browser workspace for IPT group projects, with a capacity-aware planning
 
 - Working: project setup, brief/notes, team skills and daily availability, task editing/progress, dependency checks, schedule previews, local recovery proposals, review/apply/reject, browser persistence, JSON backups/import, CSV and Markdown exports.
 - Implemented: server-side SDK coordinator, six tools, structured results, tool activity stream, source-quote validation, cancellation, run and tool limits.
-- Pending: secure API project selection/key setup and a successful real-model run. The interface correctly shows **OFFLINE** until a key is configured. The deterministic planner does not pretend to be AI.
+- Secure key setup completed: the key is stored in the approved, ignored `.env.local`; no secret is committed. A real verification request reached OpenAI but returned `credit_balance_exhausted` / `insufficient_quota`. Account API credits are required before a successful live-model run. The deterministic planner does not pretend to be AI.
 - Pending by user request: inspection feedback, followed by final demo-video capture. No public hosting or Git remote has been created.
 
 ## Run locally
@@ -21,7 +21,7 @@ npm.cmd run dev
 
 Open <http://127.0.0.1:4173>. The local server binds to loopback only. `PORT` can select a different local port. Use the secure OpenAI Developers setup flow for the API connection; never paste a secret into chat or commit it. The app reads an ignored `.env.local` at startup. Restart the server after secure setup.
 
-The default model is `gpt-5.4-mini`, configurable with `OPENAI_MODEL`. Actual account/model access and credit availability have not been verified. See the [official model page](https://developers.openai.com/api/docs/models/gpt-5.4-mini).
+The default model is `gpt-5.4-mini`, configurable with `OPENAI_MODEL`. Access to this particular model is not yet verified because account credit exhaustion blocks inference. See the [official model page](https://developers.openai.com/api/docs/models/gpt-5.4-mini).
 
 ## Inspection walkthrough
 
@@ -67,7 +67,7 @@ npm.cmd run check
 npm.cmd test
 ```
 
-20 automated checks pass at delivery. Two use the real SDK runner with a scripted local model adapter to exercise real application tools; they are explicitly **not live AI inference**. HTTP tests require localhost access. Browser QA covered sample loading, review/apply recovery, task progress, reload persistence, backup download, responsive layout and the absence of browser console errors.
+21 automated checks pass at the latest checkpoint. Two use the real SDK runner with a scripted local model adapter to exercise real application tools; they are explicitly **not live AI inference**. HTTP tests require localhost access. Browser QA covered sample loading, review/apply recovery, task progress, reload persistence, backup download, responsive layout and the absence of browser console errors.
 
 ## Version control
 

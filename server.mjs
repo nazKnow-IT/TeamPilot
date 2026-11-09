@@ -49,6 +49,9 @@ export function makeServer(){const server=http.createServer(async(req,res)=>{
 });return server;}
 export function safeError(error){
   const status=Number(error.status);
+  const code=String(error.code||error.error?.code||'');
+  const type=String(error.type||error.error?.type||'');
+  if(['credit_balance_exhausted','insufficient_quota'].includes(code)||type==='insufficient_quota')return 'No API credits remain for this account. Add credits in OpenAI Platform billing, then retry. Your saved key does not need to be replaced.';
   if(status===401)return 'The API credential was rejected. Check the secure API setup.';
   if(status===429)return 'The API reported a quota or rate limit. Check available credits and retry later.';
   if(status===403||status===404)return 'The API project cannot access the configured model. Check model permissions.';

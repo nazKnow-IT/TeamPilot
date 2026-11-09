@@ -1,8 +1,8 @@
 # TeamPilot — Group Project Coordination Agent
 
-Status: local application implemented for inspection. The live model connection is implemented but API project/key setup and real-inference verification remain pending. Final demo-video capture waits for user inspection.
+Status: local application implemented for inspection. The live model connection and secure key setup are complete, but a verification request returned credit_balance_exhausted / insufficient_quota. Account API credits and a successful real-inference workflow remain pending. Final demo-video capture waits for user inspection.
 
-Delivery evidence: 20 automated checks pass, including real SDK-runner tests with a scripted local model (not live inference). Browser QA verified recovery proposal approval, task progress, reload persistence, backup download, responsive layout and no browser console errors. See README.md for current limitations and docs/VIDEO_PLAN.md for the post-inspection video plan.
+Delivery evidence: 21 automated checks pass, including real SDK-runner tests with a scripted local model (not live inference). Browser QA verified recovery proposal approval, task progress, reload persistence, backup download, responsive layout and no browser console errors. See README.md for current limitations and docs/VIDEO_PLAN.md for the post-inspection video plan.
 
 ## Product outcome
 
@@ -115,7 +115,7 @@ Persistence must be explicit: a single-device prototype may use browser storage;
 
 ## Model connection dependency
 
-The user initially reported no AI API account. OpenAI Developers is now available, a safe environment check found no usable API key, and the native setup choice returned create. The API project/organization picker and local secret destination have not yet been confirmed. No key has been created or written, and no model request has been made.
+OpenAI Developers is available. The embedded project picker failed to display, while backend target discovery succeeded. The user approved secure fallback creation and the exact local .env.local destination. The first created key could not be saved because its temporary encryption file was unavailable. The user explicitly approved a replacement; it was securely saved, and its temporary encryption files were removed. A real verification request reached OpenAI and returned credit_balance_exhausted / insufficient_quota. The optional API credit offer was checked and returned not_qualified. No successful inference is claimed. API credits must be added by the user.
 
 Interface, schedule calculations, tool schemas, fixtures, and deterministic validation can be built before model setup. The application is not a verified autonomous AI agent until a real model completes the tool workflow successfully.
 
