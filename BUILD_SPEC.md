@@ -1,8 +1,8 @@
 # TeamPilot — Group Project Coordination Agent
 
-Status: local application implemented for inspection. The user selected Google Gemini after an OpenAI verification request returned credit_balance_exhausted. Gemini provider support and the local key-entry/test form are implemented; a Google key and successful live workflow remain pending. Final demo-video capture waits for user inspection.
+Status: local application implemented for inspection. Gemini key storage is complete, and Google accepted the key for model listing. Generation returned 503/high demand or timed out; a successful live workflow remains pending. Final demo-video capture waits for user inspection and successful live inference.
 
-Delivery evidence: 30 automated checks pass, including real SDK-runner tests with a scripted local model and Google adapter/credential tests (not live inference). Browser QA verified recovery proposal approval, task progress, reload persistence, backup download, responsive layout, the Gemini connection form and no browser console errors. See README.md for current limitations and docs/VIDEO_PLAN.md for the post-inspection video plan.
+Delivery evidence: 35 automated checks pass, including real SDK-runner tests with a scripted local model, Google adapter/credential tests and upstream error handling (not live inference). Browser QA verified recovery proposal approval, task progress, reload persistence, backup download, responsive layout, the Gemini connection form and no browser console errors. See README.md for current limitations and docs/VIDEO_PLAN.md for the post-inspection video plan.
 
 ## Product outcome
 

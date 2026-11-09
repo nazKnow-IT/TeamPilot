@@ -1,4 +1,4 @@
-export const GEMINI_MODELS=['gemini-3.8-flash','gemini-2.5-flash','gemini-2.5-flash-lite'];
+export const GEMINI_MODELS=['gemini-3.8-flash','gemini-3.1-flash-lite','gemini-2.5-flash','gemini-2.5-flash-lite'];
 export const GEMINI_BASE_URL='https://generativelanguage.googleapis.com/v1beta/openai/';
 
 export function getAIConfig(env=process.env){
@@ -25,8 +25,17 @@ export async function verifyGeminiConnection(env=process.env,{fetchImpl=fetch,si
     method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${env.GEMINI_API_KEY}`},
     body:JSON.stringify({model:config.model,messages:[{role:'user',content:'Reply with the single word Connected.'}],max_tokens:512,reasoning_effort:'low'}),signal
   });
-  const data=await response.json();
-  if(!response.ok){const error=new Error('The Gemini connection test failed.');error.provider='gemini';error.status=response.status;error.code=data.error?.code;error.providerStatus=data.error?.status;throw error;}
+  let raw;
+  try{raw=await response.json();}catch{
+    const error=new Error('Google returned a response that could not be read.');error.provider='gemini';error.status=response.status;throw error;
+  }
+  // Google's compatibility endpoint can return an array containing an error.
+  const data=Array.isArray(raw)?raw[0]:raw;
+  if(!response.ok){
+    let detail=String(data?.error?.message||'Google did not provide an error description.');
+    for(const secret of [env.GEMINI_API_KEY,env.OPENAI_API_KEY])if(secret)detail=detail.split(secret).join('[redacted]');
+    const error=new Error(detail.slice(0,1400));error.provider='gemini';error.status=response.status;error.code=data?.error?.code;error.providerStatus=data?.error?.status;throw error;
+  }
   if(!data.choices?.[0]?.message?.content?.trim())throw new Error('Gemini responded without text. The connection is not yet verified.');
   return {provider:'gemini',model:config.model,verified:true};
 }

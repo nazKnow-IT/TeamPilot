@@ -19,6 +19,8 @@ The form never returns the saved key to the browser and never includes it in pro
 - A 429 error indicates a Google quota/rate constraint. It does not require buying OpenAI credits or creating more keys to evade the limit.
 - A 404/model-access error may require selecting another listed model available to that project.
 - An invalid-key or permissions error requires checking the key, API enablement and project access in AI Studio.
+- HTTP 503 means Google is reporting temporary model/service overload. Your saved key is retained; use **Retry saved connection** without entering it again. A timeout also does not establish an invalid key.
+- The 2.5 models may appear in model listing but return that they are unavailable to new users. Their legacy availability is not a reason to keep generating new keys.
 - A saved key is not the same as verified inference. The UI identifies an unverified connection and shows errors honestly.
 - Do not enable paid Google billing just to bypass a free-tier failure without reviewing the costs yourself.
 - Google documents that free-tier content may be used for product improvement. Use the synthetic sample project for the competition demo.
@@ -30,4 +32,4 @@ Sources checked for implementation:
 - <https://ai.google.dev/gemini-api/docs/pricing>
 - <https://ai.google.dev/gemini-api/docs/billing>
 
-No Gemini key was supplied or real Gemini inference verified at the initial delivery of this migration.
+A Gemini key has now been saved. Google's model-list endpoint accepted it. Actual generation returned 503/high demand on Gemini 3.8 Flash; other attempts timed out. Legacy 2.5 tests returned unavailable-to-new-users errors. No successful generation or full autonomous workflow is yet verified.

@@ -71,9 +71,12 @@ export function safeError(error,provider=error.provider||getAIConfig().provider)
   const code=String(error.code||error.error?.code||'');
   const type=String(error.type||error.error?.type||'');
   if(provider==='gemini'){
+    if(error.name==='TimeoutError'||error.name==='AbortError')return 'Google did not respond before the connection test timed out. Your key remains saved. Retry the saved connection shortly.';
+    if(status===503)return 'Google reports that this Gemini model is experiencing high demand (503). Your key remains saved. Retry shortly or select another model available to your Free tier project.';
+    if([500,502,504].includes(status))return `Google returned a temporary service error (${status}). Your key remains saved. Retry the connection shortly.`;
     if(status===429)return 'Gemini quota or rate limit reached. Check your Google AI Studio project’s available free-tier quota and retry later. No OpenAI credits are needed.';
     if(status===400||status===401||status===403)return 'Google rejected this request. Check that the Gemini key is valid, the Gemini API is enabled, and your project can use this model in your region.';
-    if(status===404)return 'This Gemini model is unavailable to your project. Choose another listed model in Connect Gemini.';
+    if(status===404)return /no longer available to new users/i.test(error.message)?'Google says this model is no longer available to new users. Keep your saved key and select a newer model in Connect Gemini.':'This Gemini model is unavailable to your project. Choose another listed model in Connect Gemini.';
   }
   if(['credit_balance_exhausted','insufficient_quota'].includes(code)||type==='insufficient_quota')return 'No API credits remain for this account. Add credits in OpenAI Platform billing, then retry. Your saved key does not need to be replaced.';
   if(status===401)return 'The API credential was rejected. Check the secure API setup.';
