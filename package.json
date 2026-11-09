@@ -3,11 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "node --env-file-if-exists=.env.local server.mjs",
     "start": "node --env-file-if-exists=.env.local server.mjs",
     "test": "node --test tests/*.test.mjs",
     "check": "node --check server.mjs && node --check src/agent.mjs && node --check public/app.js && node --check public/planner.js"
+  },
+  "dependencies": {
+    "@openai/agents": "0.21.0",
+    "zod": "4.6.7"
   }
 }

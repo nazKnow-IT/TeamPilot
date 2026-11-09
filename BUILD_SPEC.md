@@ -1,6 +1,8 @@
 # TeamPilot — Group Project Coordination Agent
 
-Status: build specification. The application and live model connection have not yet been implemented.
+Status: local application implemented for inspection. The live model connection is implemented but API project/key setup and real-inference verification remain pending. Final demo-video capture waits for user inspection.
+
+Delivery evidence: 20 automated checks pass, including real SDK-runner tests with a scripted local model (not live inference). Browser QA verified recovery proposal approval, task progress, reload persistence, backup download, responsive layout and no browser console errors. See README.md for current limitations and docs/VIDEO_PLAN.md for the post-inspection video plan.
 
 ## Product outcome
 

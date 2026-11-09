@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="TeamPilot helps student teams turn plans into progress with capacity-aware schedules and AI-assisted recovery."><title>TeamPilot — Keep the team moving</title><link rel="icon" href="/icon.svg"><link rel="stylesheet" href="/style.css"></head>
+<body>
+<a class="skip" href="#main">Skip to workspace</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="brand" href="/"><img src="/icon.svg" width="36" height="36" alt=""><span>TeamPilot<span class="brand-dot">.</span></span></a>
+    <div class="workspace-label">YOUR WORKSPACE <span>01</span></div>
+    <nav aria-label="Workspace views" id="navigation">
+      <button class="nav-item active" data-view="overview"><span class="nav-icon">◫</span> Overview</button>
+      <button class="nav-item" data-view="board"><span class="nav-icon">▥</span> Task board <span id="nav-count" class="nav-count">0</span></button>
+      <button class="nav-item" data-view="schedule"><span class="nav-icon">▦</span> Schedule</button>
+      <button class="nav-item" data-view="team"><span class="nav-icon">◎</span> Team & capacity</button>
+      <button class="nav-item" data-view="brief"><span class="nav-icon">≡</span> Brief & notes</button>
+    </nav>
+    <div class="sidebar-bottom"><div class="mini-label">BUILT FOR STUDENT TEAMS</div><p>A clear next step.<br>A team that moves together.</p><div class="sidebar-rule"></div><span class="demo-tag">DEMO</span><span class="small muted"> Agentic AI prototype</span><p class="tiny">Saved in this browser.<br>Export a backup to keep your work.</p></div>
+  </aside>
+  <div class="main-shell">
+    <header class="topbar"><div class="breadcrumb">Workspace <span>/</span> <strong id="breadcrumb-title">Overview</strong></div><div class="top-actions"><span id="save-status" class="save-status">Saved locally</span><button class="button subtle small-button" id="sample-button">Load sample</button><button class="button subtle small-button" id="export-button">Export ▾</button><button class="button small-button" id="setup-button">Project settings</button></div></header>
+    <main id="main" tabindex="-1">
+      <div class="page-heading"><div><div class="eyebrow">LESS CHASING. MORE PROGRESS.</div><h1 id="project-title">Your next project, together.</h1><p id="project-subtitle" class="subtitle">Plan around real availability. Keep the whole team in sync.</p></div><div class="heading-date" id="deadline-summary"></div></div>
+      <div id="storage-warning" class="notice warning" hidden></div>
+      <div id="connection-banner" class="notice"><span class="status-dot amber"></span><span>Checking the local AI connection…</span></div>
+      <div class="workspace-grid">
+        <section id="workspace-content" aria-label="Project workspace"></section>
+        <aside class="agent-panel" aria-label="TeamPilot agent">
+          <div class="agent-header"><div class="agent-avatar">✳</div><div><h2>Your project copilot</h2><span id="agent-status" class="tiny muted">Ready when you are</span></div><span class="mode-pill" id="ai-mode">OFFLINE</span></div>
+          <p class="agent-intro">Give me a goal. I’ll check the dependencies, work out what fits, and bring you a plan to review.</p>
+          <div class="suggested-goals"><button class="goal-chip" data-goal="Create a complete project plan from the brief and meeting notes. Preserve existing progress and verify the schedule before proposing changes.">✧ Build a project plan</button><button class="goal-chip" data-goal="Inspect the current project for blockers and scheduling risks. Explain the most useful next actions using actual tool results.">↗ Find what’s blocking us</button><button class="goal-chip" data-goal="Prepare a concise status report showing completed work, remaining work and deadline risks.">≡ Prepare a status update</button></div>
+          <div class="agent-messages" id="agent-messages" aria-live="polite"><div class="agent-welcome"><span class="welcome-symbol">↗</span><strong>A plan that adapts.</strong><p>Add your brief and team availability. I’ll use those facts to propose the next steps.</p></div></div>
+          <div class="agent-compose"><label class="sr-only" for="agent-goal">Your goal for the agent</label><textarea id="agent-goal" maxlength="4000" rows="3" placeholder="e.g. Ali is unavailable on Tuesday. Find a way to keep our deadline."></textarea><div class="compose-footer"><span class="tiny muted">Changes always need your review</span><button id="agent-run" class="button" disabled>Run agent ↗</button><button id="agent-cancel" class="button danger" hidden>Cancel</button></div></div>
+          <div class="agent-tools"><button class="text-button" id="check-button">Check schedule locally</button><button class="text-button" id="recovery-button">Preview a recovery</button></div>
+        </aside>
+      </div>
+    </main>
+    <footer class="footer"><span>TeamPilot <span class="muted">/ From group work to teamwork.</span></span><span>Human review. Clear assumptions. Real tool results.</span></footer>
+  </div>
+</div>
+<dialog id="editor-dialog" class="modal"><div class="modal-top"><h2 id="editor-title">Edit</h2><button class="icon-button" data-close="editor-dialog" aria-label="Close editor">×</button></div><div id="editor-content"></div></dialog>
+<dialog id="proposal-dialog" class="modal wide"><div class="modal-top"><div><div class="eyebrow">YOUR REVIEW COMES FIRST</div><h2>Review the proposed plan</h2></div><button class="icon-button" data-close="proposal-dialog" aria-label="Close proposal">×</button></div><div id="proposal-content"></div></dialog>
+<dialog id="export-dialog" class="modal compact"><div class="modal-top"><h2>Take your project with you</h2><button class="icon-button" data-close="export-dialog" aria-label="Close export options">×</button></div><p class="muted">Back up your project or share a readable status report.</p><div class="export-options"><button class="button" id="download-json">Download project backup (.json)</button><button class="button subtle" id="download-csv">Download tasks (.csv)</button><button class="button subtle" id="download-report">Download status report (.md)</button><label class="button subtle file-label">Import project backup<input type="file" id="import-file" accept=".json,application/json"></label></div></dialog>
+<div class="toast" id="toast" role="status" hidden></div>
+<script type="module" src="/app.js"></script>
+</body></html>
