@@ -1,6 +1,6 @@
 # TeamPilot — Group Project Coordination Agent
 
-Status: local application implemented for inspection. Gemini key storage is complete, and Google accepted the key for model listing. Generation returned 503/high demand or timed out; a successful live workflow remains pending. Final demo-video capture waits for user inspection and successful live inference.
+Status: local application ready for inspection. Gemini 3.1 Flash-Lite passed both the connection test and a real three-tool delay-recovery workflow on synthetic data. A feasible proposal was staged without changing the project board. Final demo-video capture waits for user inspection.
 
 Delivery evidence: 35 automated checks pass, including real SDK-runner tests with a scripted local model, Google adapter/credential tests and upstream error handling (not live inference). Browser QA verified recovery proposal approval, task progress, reload persistence, backup download, responsive layout, the Gemini connection form and no browser console errors. See README.md for current limitations and docs/VIDEO_PLAN.md for the post-inspection video plan.
 
@@ -117,7 +117,7 @@ Persistence must be explicit: a single-device prototype may use browser storage;
 
 OpenAI Developers is available. The embedded project picker failed to display, while backend target discovery succeeded. The user approved secure fallback creation and the exact local .env.local destination. The first created key could not be saved because its temporary encryption file was unavailable. The user explicitly approved a replacement; it was securely saved, and its temporary encryption files were removed. A real verification request reached OpenAI and returned credit_balance_exhausted / insufficient_quota. The optional API credit offer was checked and returned not_qualified. No successful inference is claimed. API credits must be added by the user.
 
-The user subsequently chose Gemini's free-tier route and supplied a key through the local form after confirming a Free tier project. The key is stored in ignored server configuration. Google's model-list endpoint accepted it, while generation returned 503/high demand or timed out. The full autonomous workflow is not yet verified. There is no automatic OpenAI fallback. See docs/GEMINI_SETUP.md and docs/CONNECTION_DIAGNOSTICS.md.
+The user subsequently chose Gemini's free-tier route and supplied a key through the local form after confirming a Free tier project. After earlier overload/timeouts on 3.8 Flash, the user selected 3.1 Flash-Lite and verified the connection. A real agent run then completed read_project, evaluate_delay and propose_plan, preserved all five tasks and their 14-hour estimate, and produced a feasible staged recovery. See docs/LIVE_VERIFICATION.md. There is no automatic OpenAI fallback.
 
 ## Scope boundaries
 

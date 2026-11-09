@@ -6,7 +6,7 @@ A local browser workspace for IPT group projects, with a capacity-aware planning
 
 - Working: project setup, brief/notes, team skills and daily availability, task editing/progress, dependency checks, schedule previews, local recovery proposals, review/apply/reject, browser persistence, JSON backups/import, CSV and Markdown exports.
 - Implemented: server-side SDK coordinator, six tools, structured results, tool activity stream, source-quote validation, cancellation, run and tool limits.
-- Gemini provider and local connection form implemented. The user's Gemini key is saved; Google accepted it for model listing. Generation on Gemini 3.8 Flash returned HTTP 503 with a high-demand message, and some attempts timed out. The tested 2.5 models returned that they are unavailable to new users. No successful live generation or full agent workflow is claimed. The prior OpenAI key remains ignored and inactive; no automatic fallback occurs.
+- Gemini is connected and a real recovery workflow passed on `gemini-3.1-flash-lite`: the agent called `read_project`, `evaluate_delay` and `propose_plan`, moved survey analysis from Ali to Sara, and produced a feasible staged schedule without changing the board. See [live verification](docs/LIVE_VERIFICATION.md). The prior OpenAI key remains ignored and inactive; no automatic fallback occurs.
 - Pending by user request: inspection feedback, followed by final demo-video capture. No public hosting or Git remote has been created.
 
 ## Run locally
@@ -21,7 +21,7 @@ npm.cmd run dev
 
 Open <http://127.0.0.1:4173>. The local server binds to loopback only. `PORT` can select a different local port. Select **Connect Gemini** and follow [the Gemini setup guide](docs/GEMINI_SETUP.md). Never paste a secret into chat or commit it. The local form saves the Gemini key in ignored `.env.local` and updates the running server; no restart is needed after using the form.
 
-The selected default is `gemini-3.8-flash`. The form also offers `gemini-3.1-flash-lite` and legacy 2.5 models. Google's response for this new user's project says 2.5 Flash is no longer available to new users, despite appearing in model listing; do not assume listing guarantees inference access. A 3.1 Flash-Lite test timed out and is not yet verified. Google lists free-tier availability for selected models, but actual availability and quota depend on the user's project. The app cannot determine the project's billing tier; choose a Free tier project in AI Studio and do not enable paid billing for this trial. Google's free-tier content may be used to improve its products, so use synthetic demonstration data. See [Google pricing](https://ai.google.dev/gemini-api/docs/pricing).
+The currently configured and live-verified model is `gemini-3.1-flash-lite`. The initial code default remains `gemini-3.8-flash`; the form also offers legacy 2.5 models. The 3.8 test reported overload, and Google's response for this new user's project says 2.5 Flash is no longer available to new users, despite appearing in model listing. Preserve the working 3.1 Flash-Lite selection. Google lists free-tier availability for selected models, but actual availability and quota depend on the user's project. The app cannot determine the project's billing tier; choose a Free tier project in AI Studio and do not enable paid billing for this trial. Google's free-tier content may be used to improve its products, so use synthetic demonstration data. See [Google pricing](https://ai.google.dev/gemini-api/docs/pricing).
 
 `AI_PROVIDER=gemini` selects Google; it is also the default when unspecified. `GEMINI_MODEL` and `GEMINI_API_KEY` configure it. An explicitly selected `AI_PROVIDER=openai` can use the existing OpenAI configuration; the app never switches providers automatically.
 
@@ -69,6 +69,12 @@ JavaScript is shared between the browser and server to keep scheduling and valid
 ```powershell
 npm.cmd run check
 npm.cmd test
+```
+
+Optional explicit live check, after key setup (uses real provider quota):
+
+```powershell
+node --env-file=.env.local scripts/smoke-agent.mjs
 ```
 
 35 automated checks pass at the latest checkpoint. They cover planning, the SDK runner, the Google-compatible model adapter, fixed-endpoint routing, secret preservation/redaction, configuration injection rejection, local endpoint protection, provider-specific quota errors, wrapped/non-JSON upstream errors, overload, timeout and model-retirement messages. Tests use scripted models, fake keys or mocked transport and are explicitly **not live AI inference**. HTTP tests require localhost access. Browser QA covered sample loading, review/apply recovery, task progress, reload persistence, backup download, responsive layout, the Gemini connection form and the absence of browser console errors.

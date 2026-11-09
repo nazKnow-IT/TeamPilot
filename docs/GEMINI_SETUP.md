@@ -32,4 +32,4 @@ Sources checked for implementation:
 - <https://ai.google.dev/gemini-api/docs/pricing>
 - <https://ai.google.dev/gemini-api/docs/billing>
 
-A Gemini key has now been saved. Google's model-list endpoint accepted it. Actual generation returned 503/high demand on Gemini 3.8 Flash; other attempts timed out. Legacy 2.5 tests returned unavailable-to-new-users errors. No successful generation or full autonomous workflow is yet verified.
+A Gemini key has now been saved. The working selection is `gemini-3.1-flash-lite`, which passed the connection test and a real three-tool recovery workflow. Earlier 3.8 Flash attempts reported overload, and legacy 2.5 tests returned unavailable-to-new-users errors. See LIVE_VERIFICATION.md for the observed result. Keep the verified 3.1 Flash-Lite selection for the demo.
