@@ -1,0 +1,28 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {mkdtemp,writeFile,readFile,unlink,rmdir} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {getAIConfig,resolveAgentModel,verifyGeminiConnection,GEMINI_BASE_URL} from '../src/providers.mjs';
+import {saveGeminiConfig} from '../src/secrets.mjs';
+import {makeServer,safeError} from '../server.mjs';
+
+const fakeKey='test-only-Gemini-key-not-a-real-secret';
+async function fixture(t){const dir=await mkdtemp(join(tmpdir(),'teampilot-test-')),envPath=join(dir,'.env.local');t.after(async()=>{await unlink(envPath).catch(e=>{if(e.code!=='ENOENT')throw e;});await rmdir(dir);});return envPath;}
+test('Gemini is the default and never borrows the OpenAI key',()=>{const c=getAIConfig({OPENAI_API_KEY:'unused-test-key'});assert.equal(c.provider,'gemini');assert.equal(c.configured,false);assert.equal(c.model,'gemini-3.8-flash');const o=getAIConfig({AI_PROVIDER:'openai',OPENAI_API_KEY:'test'});assert.equal(o.provider,'openai');assert.equal(o.configured,true);});
+test('unsupported Gemini models and missing credentials are rejected',async()=>{assert.throws(()=>getAIConfig({GEMINI_MODEL:'invented-model'}),/supported Gemini model/);await assert.rejects(()=>resolveAgentModel(getAIConfig({}),{}),/not connected/);});
+test('Gemini uses the real SDK compatibility adapter without an inference request',async()=>{const env={GEMINI_API_KEY:fakeKey},model=await resolveAgentModel(getAIConfig(env),env);assert.equal(model.constructor.name,'OpenAIChatCompletionsModel');});
+test('local key save preserves existing secrets and returns no secret values',async t=>{const envPath=await fixture(t),env={OPENAI_API_KEY:'existing-test-only-key'};await writeFile(envPath,'OPENAI_API_KEY=existing-test-only-key\nPORT=4173\n');const result=await saveGeminiConfig({apiKey:fakeKey,model:'gemini-3.8-flash'},{envPath,env});const saved=await readFile(envPath,'utf8');assert.ok(saved.includes('OPENAI_API_KEY=existing-test-only-key'));assert.ok(saved.includes('AI_PROVIDER=gemini'));assert.equal(env.GEMINI_API_KEY,fakeKey);assert.equal(JSON.stringify(result).includes(fakeKey),false);});
+test('model changes retain the saved Gemini key without requiring it to be returned',async t=>{const envPath=await fixture(t),env={GEMINI_API_KEY:fakeKey};await saveGeminiConfig({apiKey:'',model:'gemini-2.5-flash'},{envPath,env});assert.equal(env.GEMINI_API_KEY,fakeKey);assert.equal(env.GEMINI_MODEL,'gemini-2.5-flash');});
+test('configuration rejects injected lines and unlisted models before writing',async t=>{const envPath=await fixture(t);await assert.rejects(()=>saveGeminiConfig({apiKey:fakeKey+'\nAI_PROVIDER=openai',model:'gemini-3.8-flash'},{envPath,env:{}}),/line breaks/);await assert.rejects(()=>saveGeminiConfig({apiKey:fakeKey,model:'other'},{envPath,env:{}}),/supported Gemini/);});
+test('connection check sends credentials only to the fixed Google endpoint',async()=>{const env={GEMINI_API_KEY:fakeKey};let request;const result=await verifyGeminiConnection(env,{fetchImpl:async(url,options)=>{request={url,options};return {ok:true,json:async()=>({choices:[{message:{content:'Connected'}}]})};}});assert.equal(request.url,GEMINI_BASE_URL+'chat/completions');assert.equal(request.options.headers.Authorization,'Bearer '+fakeKey);assert.equal(result.verified,true);assert.equal(JSON.stringify(result).includes(fakeKey),false);});
+test('Gemini quota failure does not instruct the user to fund OpenAI',async()=>{await assert.rejects(()=>verifyGeminiConnection({GEMINI_API_KEY:fakeKey},{fetchImpl:async()=>({ok:false,status:429,json:async()=>({error:{code:429,status:'RESOURCE_EXHAUSTED'}})})}),error=>{const message=safeError(error);assert.match(message,/Gemini quota/);assert.doesNotMatch(message,/Add credits in OpenAI/);return true;});});
+test('local connection endpoint requires origin, token and free-tier acknowledgement; secrets stay server-side',async t=>{
+  const envPath=await fixture(t),env={};const server=makeServer({env,envPath,fetchImpl:async()=>({ok:true,json:async()=>({choices:[{message:{content:'Connected'}}]})})});await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));t.after(()=>new Promise(resolve=>server.close(resolve)));const base=`http://127.0.0.1:${server.address().port}`;
+  const status=await (await fetch(base+'/api/status')).json();const headers={'Content-Type':'application/json',Origin:base,'X-TeamPilot-Token':status.token};const data={apiKey:fakeKey,model:'gemini-3.8-flash',freeTierConfirmed:true};
+  assert.equal((await fetch(base+'/api/connect-gemini',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})).status,403);
+  assert.equal((await fetch(base+'/api/connect-gemini',{method:'POST',headers,body:JSON.stringify({...data,freeTierConfirmed:false})})).status,400);
+  const saved=await fetch(base+'/api/connect-gemini',{method:'POST',headers,body:JSON.stringify(data)});assert.equal(saved.status,200);assert.equal((await saved.text()).includes(fakeKey),false);
+  const verified=await fetch(base+'/api/test-provider',{method:'POST',headers,body:'{}'});assert.equal((await verified.json()).verified,true);
+  const updated=await fetch(base+'/api/status');const text=await updated.text();assert.equal(text.includes(fakeKey),false);const c=JSON.parse(text);assert.equal(c.provider,'gemini');assert.equal(c.aiConfigured,true);assert.equal(c.connectionVerified,true);
+});

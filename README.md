@@ -1,12 +1,12 @@
 # TeamPilot
 
-A local browser workspace for IPT group projects, with a capacity-aware planning engine and an OpenAI Agents SDK coordinator. The model can investigate and stage proposals; the team leader reviews changes before applying them.
+A local browser workspace for IPT group projects, with a capacity-aware planning engine and an Agents SDK coordinator. Google Gemini is the selected provider, using Google's documented OpenAI-compatible endpoint. The model can investigate and stage proposals; the team leader reviews changes before applying them.
 
 ## Current delivery state
 
 - Working: project setup, brief/notes, team skills and daily availability, task editing/progress, dependency checks, schedule previews, local recovery proposals, review/apply/reject, browser persistence, JSON backups/import, CSV and Markdown exports.
 - Implemented: server-side SDK coordinator, six tools, structured results, tool activity stream, source-quote validation, cancellation, run and tool limits.
-- Secure key setup completed: the key is stored in the approved, ignored `.env.local`; no secret is committed. A real verification request reached OpenAI but returned `credit_balance_exhausted` / `insufficient_quota`. Account API credits are required before a successful live-model run. The deterministic planner does not pretend to be AI.
+- Gemini provider and local connection form implemented. A Gemini key must be supplied from the user's Google AI Studio project before live verification. No automatic OpenAI fallback occurs. The prior OpenAI key remains ignored and inactive; its account had exhausted credits. The deterministic planner does not pretend to be AI.
 - Pending by user request: inspection feedback, followed by final demo-video capture. No public hosting or Git remote has been created.
 
 ## Run locally
@@ -19,9 +19,11 @@ npm.cmd ci
 npm.cmd run dev
 ```
 
-Open <http://127.0.0.1:4173>. The local server binds to loopback only. `PORT` can select a different local port. Use the secure OpenAI Developers setup flow for the API connection; never paste a secret into chat or commit it. The app reads an ignored `.env.local` at startup. Restart the server after secure setup.
+Open <http://127.0.0.1:4173>. The local server binds to loopback only. `PORT` can select a different local port. Select **Connect Gemini** and follow [the Gemini setup guide](docs/GEMINI_SETUP.md). Never paste a secret into chat or commit it. The local form saves the Gemini key in ignored `.env.local` and updates the running server; no restart is needed after using the form.
 
-The default model is `gpt-5.4-mini`, configurable with `OPENAI_MODEL`. Access to this particular model is not yet verified because account credit exhaustion blocks inference. See the [official model page](https://developers.openai.com/api/docs/models/gpt-5.4-mini).
+The selected default is `gemini-3.8-flash`. The local connection form also allows `gemini-2.5-flash` and `gemini-2.5-flash-lite`. Google lists free-tier availability for selected models, but actual availability and quota depend on the user's project. The app cannot determine the project's billing tier; choose a Free tier project in AI Studio and do not enable paid billing for this trial. Google's free-tier content may be used to improve its products, so use synthetic demonstration data. See [Google pricing](https://ai.google.dev/gemini-api/docs/pricing).
+
+`AI_PROVIDER=gemini` selects Google; it is also the default when unspecified. `GEMINI_MODEL` and `GEMINI_API_KEY` configure it. An explicitly selected `AI_PROVIDER=openai` can use the existing OpenAI configuration; the app never switches providers automatically.
 
 ## Inspection walkthrough
 
@@ -33,13 +35,15 @@ The default model is `gpt-5.4-mini`, configurable with `OPENAI_MODEL`. Access to
 6. Edit a task's progress, then reload. The saved data should persist.
 7. Export a JSON backup or a readable report. Export before clearing browser storage or loading another project.
 
-After API setup, select a suggested agent goal or enter a request. Project text is sent to OpenAI only when a live run is started. Tool arguments/results appear in the activity panel. SDK trace collection is disabled. Do not use confidential information in the competition demonstration.
+After API setup, select a suggested agent goal or enter a request. Project text is sent to the selected provider only when a live run is started. Saving Gemini configuration also sends one short connection-test prompt to Google. Tool arguments/results appear in the activity panel. SDK trace collection is disabled. Do not use confidential information in the competition demonstration.
 
 ## Architecture
 
 - `public/`: dependency-free HTML/CSS/JavaScript interface and shared planning rules.
 - `public/planner.js`: validated data contracts, topological dependency checks, half-hour scheduling, staged proposals and revision checks.
 - `src/agent.mjs`: one Agents SDK agent, six narrowly scoped tools, verified source evidence and structured output.
+- `src/providers.mjs`: explicit provider selection, Google-compatible SDK model and bounded connection test. Gemini uses ordinary final text while proposal data stays schema-validated through tools.
+- `src/secrets.mjs`: fixed-destination local key storage, input validation, atomic updates and preservation of unrelated configuration.
 - `server.mjs`: localhost static server and NDJSON agent endpoint; key stays server-side.
 - `tests/`: planner, HTTP/security and deterministic SDK integration checks.
 - `docs/VIDEO_PLAN.md`: narration and capture checklist for the post-inspection demo.
@@ -67,7 +71,7 @@ npm.cmd run check
 npm.cmd test
 ```
 
-21 automated checks pass at the latest checkpoint. Two use the real SDK runner with a scripted local model adapter to exercise real application tools; they are explicitly **not live AI inference**. HTTP tests require localhost access. Browser QA covered sample loading, review/apply recovery, task progress, reload persistence, backup download, responsive layout and the absence of browser console errors.
+30 automated checks pass at the latest checkpoint. They cover planning, the SDK runner, the Google-compatible model adapter, fixed-endpoint routing, secret preservation/redaction, configuration injection rejection, local endpoint protection and provider-specific quota errors. Tests use scripted models, fake keys or mocked transport and are explicitly **not live AI inference**. HTTP tests require localhost access. Browser QA covered sample loading, review/apply recovery, task progress, reload persistence, backup download, responsive layout, the Gemini connection form and the absence of browser console errors.
 
 ## Version control
 
@@ -84,5 +88,7 @@ git diff
 - [Agents SDK overview](https://developers.openai.com/api/docs/guides/agents/sdk)
 - [Agent definitions and structured output](https://developers.openai.com/api/docs/guides/agents/define-agents)
 - [Running agents](https://developers.openai.com/api/docs/guides/agents/running-agents)
+- [Google's OpenAI compatibility and function calling](https://ai.google.dev/gemini-api/docs/openai)
+- [Google AI Studio API keys](https://ai.google.dev/gemini-api/docs/api-key)
 
 These references inform implementation. They are not claims that a live API request has succeeded.

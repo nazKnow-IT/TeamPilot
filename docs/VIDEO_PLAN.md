@@ -77,6 +77,6 @@ Problem: Student teams coordinate assignments through scattered notes and inform
 
 Solution: TeamPilot reads assignment briefs and meeting notes, proposes tasks and owners, and uses tools to validate dependencies and available work hours. When a member is delayed, the agent evaluates the impact and stages a revised plan. A team leader reviews changes before applying them.
 
-Framework/tool disclosure: OpenAI Agents SDK; [actual model]; Zod; custom JavaScript scheduler; Node.js; HTML/CSS/JavaScript.
+Framework/tool disclosure: OpenAI Agents SDK; Google Gemini through Google's OpenAI-compatible endpoint (confirm actual model used); Zod; custom JavaScript scheduler; Node.js; HTML/CSS/JavaScript.
 
 These are drafts. Verify the final form's character limits and the actual completed implementation before submission.
