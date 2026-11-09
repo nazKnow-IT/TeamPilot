@@ -1,5 +1,7 @@
 # TeamPilot narrated demo
 
+The latest requested version uses **English narration with the approved Malaysian male voice**. See [VIDEO_ENGLISH_MALAYSIAN_DELIVERY.md](VIDEO_ENGLISH_MALAYSIAN_DELIVERY.md); the video is `artifacts/video-english-malaysian/TeamPilot-demo-english-malaysian-male.mp4`.
+
 The revised male Malay version is documented in [VIDEO_MALAY_DELIVERY.md](VIDEO_MALAY_DELIVERY.md) and stored in `artifacts/video-malay/TeamPilot-demo-malay-male.mp4`.
 
 The video follows a fictional campus recycling project through a real Gemini delay-recovery run. It shows the existing brief and capacity, Ali's three-day absence, actual application tool results, a staged proposal, human approval, the updated board, and export options.

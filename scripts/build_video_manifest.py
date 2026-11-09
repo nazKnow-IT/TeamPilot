@@ -95,7 +95,7 @@ def main() -> None:
     parser.add_argument("--project-root", type=Path, default=default_root)
     parser.add_argument("--output-dir", type=Path)
     parser.add_argument("--source", type=Path, help="Narration Markdown; defaults to the English final script")
-    parser.add_argument("--language", default="en-US", choices=("en-US", "ms-MY"))
+    parser.add_argument("--language", default="en-US", choices=("en-US", "ms-MY", "en-MY"))
     parser.add_argument("--frames-dir", default="frames", help="Frame path relative to the generated manifest")
     args = parser.parse_args()
     root = args.project_root.resolve()
